@@ -246,20 +246,66 @@ public class Model extends Observable {
     }
 
     /**
-     * Get the path from start word to target word (if showPath is enabled).
+     * Calculate a possible path from start word to target word.
+     * This uses a simple breadth-first search algorithm.
+     * @return List of words forming a path, or empty list if no path found
      */
-    public List<String> getPath() {
-        if (!showPath) {
-            return Collections.emptyList();
+    public List<String> calculatePath() {
+        // If dictionary is empty or start/target are the same, return empty path
+        if (dictionary.isEmpty() || startWord.equals(targetWord)) {
+            return new ArrayList<>();
         }
 
-        List<String> path = new ArrayList<>();
-        path.add(startWord);
-        path.addAll(attempts);
+        // Use breadth-first search to find a path
+        Queue<String> queue = new LinkedList<>();
+        Map<String, String> parentMap = new HashMap<>();
+        Set<String> visited = new HashSet<>();
 
-        return path;
+        queue.offer(startWord);
+        visited.add(startWord);
+
+        while (!queue.isEmpty()) {
+            String current = queue.poll();
+
+            // If we found the target word, reconstruct the path
+            if (current.equals(targetWord)) {
+                List<String> path = new ArrayList<>();
+                String word = targetWord;
+                while (!word.equals(startWord)) {
+                    path.add(0, word);
+                    word = parentMap.get(word);
+                }
+                return path;
+            }
+
+            // Try changing each position
+            char[] wordChars = current.toCharArray();
+            for (int i = 0; i < wordChars.length; i++) {
+                char originalChar = wordChars[i];
+
+                // Try all possible letters
+                for (char c = 'a'; c <= 'z'; c++) {
+                    if (c != originalChar) {
+                        wordChars[i] = c;
+                        String newWord = new String(wordChars);
+
+                        // Check if it's a valid word and not visited
+                        if (dictionary.contains(newWord) && !visited.contains(newWord)) {
+                            queue.offer(newWord);
+                            visited.add(newWord);
+                            parentMap.put(newWord, current);
+                        }
+                    }
+                }
+
+                // Restore original character
+                wordChars[i] = originalChar;
+            }
+        }
+
+        // If no path found, return empty list
+        return new ArrayList<>();
     }
-
     /**
      * Check if error messages should be shown.
      */

@@ -112,7 +112,7 @@ public class CLI {
 
         // Print path if enabled
         if (model.isShowPath()) {
-            List<String> path = model.getPath();
+            List<String> path = model.calculatePath();
             if (!path.isEmpty()) {
                 System.out.println("SOLUTION PATH:");
                 for (int i = 0; i < path.size(); i++) {
