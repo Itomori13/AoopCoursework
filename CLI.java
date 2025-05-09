@@ -1,16 +1,13 @@
 package weaver;
 
-
-
 import java.util.List;
 import java.util.Scanner;
 
 /**
- * Command Line Interface version of the Weaver game.
- * This class directly uses the Model from the GUI version without using View or Controller.
+ * CLI version.
  */
 public class CLI {
-    private Model model;  // Directly using the same Model class as the GUI version
+    private Model model;  // Directly using the same Model class as the GUI version not using view and controller
     private Scanner scanner;
     private boolean running;
 
@@ -25,7 +22,7 @@ public class CLI {
     }
 
     /**
-     * Start the CLI game loop.
+     * Start the CLI game
      */
     public void start() {
         printWelcome();
@@ -43,19 +40,17 @@ public class CLI {
         }
 
         scanner.close();
-        System.out.println("Thanks for playing Weaver! Goodbye.");
     }
 
     /**
      * Print the welcome message and instructions.
      */
     private void printWelcome() {
-        System.out.println("==========================================");
-        System.out.println("            WEAVER WORD GAME             ");
-        System.out.println("==========================================");
-        System.out.println("Transform the start word into the target word,");
-        System.out.println("changing one letter at a time.");
-        System.out.println("Each new word must be a valid dictionary word.");
+        System.out.println("            WEAVER             ");
+        System.out.println("game of the rules are shown below:");
+        System.out.println("1.Start with the given word and transform it to reach the target word.");
+        System.out.println("2.changing one letter at a time.");
+        System.out.println("3.Each new word must be a valid dictionary word.");
         System.out.println();
         printHelp();
     }
@@ -76,7 +71,6 @@ public class CLI {
                 (model.isShowErrorMessage() ? "ON" : "OFF") + ")");
         System.out.println("  help   - Show these instructions");
         System.out.println("  quit   - Exit the game");
-        System.out.println("==========================================");
     }
 
     /**
@@ -91,12 +85,12 @@ public class CLI {
         // Print previous attempts
         List<String> attempts = model.getAttempts();
         if (!attempts.isEmpty()) {
-            System.out.println("YOUR ATTEMPTS:");
+            System.out.println("ATTEMPTS:");
             for (int i = 0; i < attempts.size(); i++) {
                 String attempt = attempts.get(i);
                 System.out.print((i + 1) + ". " + attempt + " ");
 
-                // Print letter status indicators
+                // Print letter status
                 int[] letterStatus = model.getLetterStatus(attempt);
                 for (int j = 0; j < letterStatus.length; j++) {
                     if (letterStatus[j] == 1) {
@@ -110,11 +104,11 @@ public class CLI {
             System.out.println();
         }
 
-        // Print path if enabled
+        // Print path
         if (model.isShowPath()) {
             List<String> path = model.calculatePath();
             if (!path.isEmpty()) {
-                System.out.println("SOLUTION PATH:");
+                System.out.println("Probably solution path:");
                 for (int i = 0; i < path.size(); i++) {
                     System.out.println((i + 1) + ". " + path.get(i));
                 }
@@ -170,44 +164,35 @@ public class CLI {
      * Try a word as the next attempt.
      */
     private void tryWord(String word) {
-        // Check if it's a valid word
-        if (!model.isValidWord(word)) {
+        // Validate the word
+        Model.WordError error = model.validateWord(word);
+
+        if (error != Model.WordError.NONE) {
+            // Show error message if errors are enabled
             if (model.isShowErrorMessage()) {
-                System.out.println("'" + word + "' is not in the dictionary.");
+                System.out.println(model.getErrorMessage(error, word));
             }
             return;
         }
 
-        // Try the word
-        boolean success = model.tryWord(word);
-
-        if (!success) {
-            if (model.isShowErrorMessage()) {
-                String previousWord = model.getAttempts().isEmpty() ?
-                        model.getStartWord() : model.getAttempts().get(model.getAttempts().size() - 1);
-                System.out.println("'" + word + "' differs by more than one letter from '" + previousWord + "'.");
-            }
-        }
+        // If we get here, word is valid
+        model.tryWord(word);
     }
 
     /**
      * Print the win message.
      */
     private void printWin() {
-        System.out.println("==========================================");
-        System.out.println("              CONGRATULATIONS!            ");
-        System.out.println("==========================================");
-        System.out.println("You've successfully transformed '" + model.getStartWord() +
+        System.out.println("Congratulations!You've successfully transformed '" + model.getStartWord() +
                 "' into '" + model.getTargetWord() + "'!");
         System.out.println("Number of steps: " + model.getAttempts().size());
-        System.out.println("==========================================");
     }
 
     /**
      * Prompt for a new game after winning.
      */
     private void promptNewGame() {
-        System.out.print("Would you like to play again? (y/n): ");
+        System.out.print("play again? (y/n): ");
         String response = scanner.nextLine().trim().toLowerCase();
 
         if (response.equals("y") || response.equals("yes")) {
@@ -218,7 +203,7 @@ public class CLI {
     }
 
     /**
-     * Main method - entry point for the CLI version.
+     * Main method
      */
     public static void main(String[] args) {
         CLI cli = new CLI();

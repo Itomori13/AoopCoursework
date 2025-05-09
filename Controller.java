@@ -5,7 +5,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * Controller class for the Weaver game.
  * Handles user interactions and connects the View with the Model.
  */
 public class Controller {
@@ -25,42 +24,26 @@ public class Controller {
         view.addNewGameListener(new NewGameListener());
         view.addHelpListener(new HelpListener());
         view.addToggleListeners(new PathToggleListener());
+        view.addErrorToggleListener(new ErrorToggleListener());
+        view.addRandomToggleListener(new RandomToggleListener());
         view.addKeyboardListeners(new LetterListener(), new BackspaceListener());
     }
 
     /**
-     * Listener for word submission.
+     * Listener for word to enter.
      */
     private class WordListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             String input = view.getInputText().toLowerCase();
 
-            // Check if input is complete
-            if (input.length() < 4) {
-                view.showErrorMessage("Please enter a 4-letter word");
-                return;
-            }
+            Model.WordError error = model.validateWord(input);
 
-            // Check if word is already used
-            if (model.getAttempts().contains(input)) {
-                view.showErrorMessage("You've already used this word");
-                return;
-            }
-
-            // Check if word exists in dictionary
-            if (!model.isValidWord(input)) {
-                view.showErrorMessage("Not a valid word in the dictionary");
-                return;
-            }
-
-            // Check if only one letter has been changed from the previous word
-            String previousWord = model.getAttempts().isEmpty()
-                    ? model.getStartWord()
-                    : model.getAttempts().get(model.getAttempts().size() - 1);
-
-            if (!differsByOneLetter(previousWord, input)) {
-                view.showErrorMessage("You can only change one letter at a time");
+            if (error != Model.WordError.NONE) {
+                // Show error message if errors are enabled
+                if (model.isShowErrorMessage()) {
+                    view.showErrorMessage(model.getErrorMessage(error, input));
+                }
                 return;
             }
 
@@ -72,7 +55,7 @@ public class Controller {
                 // Check if the player has won
                 if (model.hasWon()) {
                     SwingUtilities.invokeLater(() -> {
-                        // Slight delay to ensure UI updates first
+                        // take some time for UI update
                         try {
                             Thread.sleep(500);
                         } catch (InterruptedException ex) {
@@ -82,28 +65,11 @@ public class Controller {
                     });
                 }
             } else {
-                // This shouldn't happen with our validation, but just in case
+                // Out of expectation output
                 view.showErrorMessage("Invalid word");
             }
-        }
 
-        /**
-         * Helper method to check if two words differ by exactly one letter.
-         * (We're implementing it here since we don't have direct access to Model's private method)
-         */
-        private boolean differsByOneLetter(String word1, String word2) {
-            if (word1.length() != word2.length()) {
-                return false;
-            }
 
-            int differences = 0;
-            for (int i = 0; i < word1.length(); i++) {
-                if (word1.charAt(i) != word2.charAt(i)) {
-                    differences++;
-                }
-            }
-
-            return differences == 1;
         }
     }
 
@@ -179,9 +145,10 @@ public class Controller {
     private class HelpListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            view.showHelpDialog();
+            view.showHelpRule();
         }
     }
+
 
     /**
      * Listener for path toggle button.
@@ -193,4 +160,39 @@ public class Controller {
             model.setShowPath(button.isSelected());
         }
     }
+    /**
+     * Listener for error toggle button.
+     */
+    private class ErrorToggleListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            JToggleButton button = (JToggleButton) e.getSource();
+            model.setShowErrorMessage(button.isSelected());
+        }
+    }
+    /**
+     * Listener for random words toggle button.
+     */
+    private class RandomToggleListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            JToggleButton button = (JToggleButton) e.getSource();
+            model.setUseRandomWords(button.isSelected());
+
+            // Ask if user wants to start a new game with the new setting
+            int response = JOptionPane.showConfirmDialog(
+                    view,
+                    "Do you want to start a new game with " +
+                            (button.isSelected() ? "random" : "default") + " words?",
+                    "New Game",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE
+            );
+
+            if (response == JOptionPane.YES_OPTION) {
+                model.newGame();
+                view.clearInput();
+            }
+        }
+}
 }
