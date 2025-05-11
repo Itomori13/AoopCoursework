@@ -7,15 +7,14 @@ import java.util.Scanner;
  * CLI version.
  */
 public class CLI {
-    private Model model;  // Directly using the same Model class as the GUI version not using view and controller
+    private Model model;
     private Scanner scanner;
     private boolean running;
 
     /**
      * Constructor initializes the CLI with the Model.
      */
-    public CLI() {
-        // Use the same Model class as the GUI version
+    public CLI(){
         model = new Model();
         scanner = new Scanner(System.in);
         running = true;

@@ -111,41 +111,6 @@ public class Model extends Observable {
                 return "";
         }
     }
-
-    /**
-     * Constructor initializes the model with default values and loads the dictionary.
-     * @ensures dictionary loaded and default words set
-     */
-
-    public Model() {
-        // Initialize game state
-        attempts = new ArrayList<>();
-
-        // Initialize flags
-        showErrorMessage = true;
-        showPath = false;
-        useRandomWords = false;
-
-        // Load dictionary
-        dictionary = new HashSet<>();
-        wordsByLength = new HashMap<>();
-        loadDictionary();
-
-        // Set initial words
-        setupNewGame();
-
-        // Check postconditions
-        assert attempts.isEmpty() : "Attempts must be initialized and empty";
-        assert showErrorMessage : "ShowErrorMessage must be initialized to true";
-        assert !showPath : "ShowPath must be initialized to false";
-        assert !useRandomWords : "UseRandomWords must be initialized to false";
-        assert !dictionary.isEmpty() : "Dictionary must be loaded";
-        assert startWord != null && startWord.length() == 4 : "StartWord must be initialized correctly";
-        assert targetWord != null && targetWord.length() == 4 : "TargetWord must be initialized correctly";
-        assert !startWord.equals(targetWord) : "StartWord and TargetWord must be different";
-
-        checkInvariants();
-    }
     /**
      * Checks class invariants are maintained or not
      */
@@ -181,6 +146,40 @@ public class Model extends Observable {
     }
 
 
+    /**
+     * Constructor initializes the model with default values and loads the dictionary.
+     * @ensures dictionary loaded and default words set
+     */
+
+    public Model() {
+        // Initialize game state
+        attempts = new ArrayList<>();
+
+        // Initialize flags
+        showErrorMessage = true;
+        showPath = false;
+        useRandomWords = false;
+
+        // Load dictionary
+        dictionary = new HashSet<>();
+        wordsByLength = new HashMap<>();
+        loadDictionary();
+
+        // Set initial words
+        setupNewGame();
+
+        // Check postconditions
+        assert attempts.isEmpty() : "Attempts must be initialized and empty";
+        assert showErrorMessage : "ShowErrorMessage must be initialized to true";
+        assert !showPath : "ShowPath must be initialized to false";
+        assert !useRandomWords : "UseRandomWords must be initialized to false";
+        assert !dictionary.isEmpty() : "Dictionary must be loaded";
+        assert startWord != null && startWord.length() == 4 : "StartWord must be initialized correctly";
+        assert targetWord != null && targetWord.length() == 4 : "TargetWord must be initialized correctly";
+        assert !startWord.equals(targetWord) : "StartWord and TargetWord must be different";
+
+        checkInvariants();
+    }
 
     /**
      * Load dictionary from file.
